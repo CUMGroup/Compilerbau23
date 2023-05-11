@@ -24,4 +24,11 @@ public class ASTAssignStmt extends ASTStmtNode {
     public void execute() {
         this.symbol.m_number = this.expression.eval();
     }
+
+    public compiler.InstrIntf codegen(compiler.CompileEnvIntf env) {
+        compiler.InstrIntf expr = this.expression.codegen(env);
+        compiler.InstrIntf instr = new compiler.instr.InstrAssignStmt(symbol, expr);
+        env.addInstr(instr);
+        return instr;
+    }
 }

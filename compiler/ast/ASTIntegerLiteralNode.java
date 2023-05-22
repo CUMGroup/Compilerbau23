@@ -1,5 +1,7 @@
 package compiler.ast;
 
+import compiler.info.ConstInfo;
+
 import java.io.OutputStreamWriter;
 
 public class ASTIntegerLiteralNode extends ASTExprNode {
@@ -35,4 +37,8 @@ public class ASTIntegerLiteralNode extends ASTExprNode {
         return instr;
     }
 
+    @Override
+    public ConstInfo constFold() {
+        return new ConstInfo(true, Integer.parseInt(this.m_value));
+    }
 }

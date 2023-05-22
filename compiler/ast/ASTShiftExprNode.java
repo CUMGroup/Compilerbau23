@@ -2,6 +2,9 @@ package compiler.ast;
 
 import java.io.OutputStreamWriter;
 
+import compiler.info.ConstInfo;
+import compiler.instr.InstrIntegerLiteral;
+
 public class ASTShiftExprNode extends ASTExprNode {
     
     ASTExprNode m_lhs;
@@ -37,10 +40,27 @@ public class ASTShiftExprNode extends ASTExprNode {
 
     @Override
     public compiler.InstrIntf codegen(compiler.CompileEnvIntf env) {
+        ConstInfo constInfo = this.constFold();
+        if (constInfo.isConst()) {
+            InstrIntegerLiteral res = new InstrIntegerLiteral(constInfo.getValue());
+            env.addInstr(res);
+            return res;
+        }
         compiler.InstrIntf lhs = m_lhs.codegen(env);
         compiler.InstrIntf rhs = m_rhs.codegen(env);
         compiler.InstrIntf instr = new compiler.instr.InstrShiftOperation(m_token.m_type, lhs, rhs);
         env.addInstr(instr);
         return instr;
+    }
+
+    @Override
+    public ConstInfo constFold() {
+        ConstInfo lhsConstInfo = this.m_lhs.constFold();
+        ConstInfo rhsConstInfo = this.m_rhs.constFold();
+        if (lhsConstInfo.isConst() && rhsConstInfo.isConst()) {
+            int value = this.eval();
+            return new ConstInfo(true, value);
+        }
+        return new ConstInfo(false, 0);
     }
 }
